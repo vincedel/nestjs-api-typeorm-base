@@ -1,4 +1,9 @@
-import { Controller, Get } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  Controller,
+  Get,
+  UseInterceptors,
+} from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
@@ -9,7 +14,8 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('me')
+  @UseInterceptors(ClassSerializerInterceptor)
   async getCurrentUser() {
-    return true;
+    return { result: true };
   }
 }
