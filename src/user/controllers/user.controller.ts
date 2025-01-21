@@ -18,6 +18,8 @@ import { User } from '../../database/entities/user.entity';
 import { HttpErrorResponseDto } from '../../common/dto/http-error-response.dto';
 import { Roles } from '../../auth/decorators/roles.decorator';
 import { RoleEnum } from '../../common/enums/role.enum';
+import { UserPayloadDto } from '../../auth/dto/user-payload.dto';
+import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 
 @ApiTags('Users')
 @Controller('users')
@@ -27,9 +29,20 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('me')
+  @ApiOkResponse({ type: User })
   @UseInterceptors(ClassSerializerInterceptor)
-  async getCurrentUser() {
-    return { result: true };
+  @ApiNotFoundResponse({
+    description: 'User with ID ${id} not found',
+    type: HttpErrorResponseDto,
+  })
+  async getCurrentUser(@CurrentUser() currentUser: UserPayloadDto) {
+    const user = await this.userService.getUserById(currentUser.userId);
+
+    if (user) {
+      return user;
+    }
+
+    throw new NotFoundException(`User with ID ${currentUser.userId} not found`);
   }
 
   @Get(':id')
