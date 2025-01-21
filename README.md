@@ -32,9 +32,28 @@
 $ npm install
 ```
 
+Copy/Paste the .env.example file to .env and the .env.db.example file to .env.db
+
+Change the information inside like as you want.
+
+You can generate a new JWT secret key using the following command:
+
+```bash
+$ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+We need to build and up the database using the following command:
+
+```bash
+$ docker compose up -d
+```
+
 ## Compile and run the project
 
 ```bash
+# Lauch the database
+$ docker compose up -d
+
 # development
 $ npm run start
 
