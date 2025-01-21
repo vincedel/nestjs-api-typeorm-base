@@ -19,4 +19,25 @@ export class UserService {
 
     return null;
   }
+
+  async getUsersByUsernameOrEmail(
+    usernameOrEmail: string,
+  ): Promise<User | null> {
+    const user = await this.userRepository.findOne({
+      where: [
+        {
+          username: usernameOrEmail,
+        },
+        {
+          email: usernameOrEmail,
+        },
+      ],
+    });
+
+    if (user) {
+      return user;
+    }
+
+    return null;
+  }
 }

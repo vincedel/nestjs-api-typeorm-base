@@ -16,10 +16,13 @@ import {
 } from '@nestjs/swagger';
 import { User } from '../../database/entities/user.entity';
 import { HttpErrorResponseDto } from '../../common/dto/http-error-response.dto';
+import { Roles } from '../../auth/decorators/roles.decorator';
+import { RoleEnum } from '../../common/enums/role.enum';
 
 @ApiTags('Users')
 @Controller('users')
 @ApiBearerAuth('jwt')
+@Roles(RoleEnum.User)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
