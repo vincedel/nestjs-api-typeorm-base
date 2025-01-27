@@ -110,7 +110,7 @@ If you need to use it in a DTO, you need to provide it in your module main file 
 export class OtherModule {}
 ```
 
-We've added to the main configuration of the app this code (You can find it in [/src/config/main-config.ts](src\config\main-config.ts)):
+We've added to the main configuration of the app this code (You can find it in [/src/config/main-config.ts](src/config/main-config.ts)):
 
 ```ts
 useContainer(app.select(AppModule), { fallbackOnErrors: true });
@@ -129,4 +129,4 @@ If you need to change the validation options for a specific DTO you can use the 
 export class MyDto {...}
 ```
 
-This will override the default configuration that you can change in the file [/src/common/pipes/CustomValidationPipe.pipe.ts](src\common\pipes\CustomValidationPipe.pipe.ts) with the method: `getDefaultValidatorOptions`
+This will override the default configuration that you can change in the file [/src/common/pipes/CustomValidationPipe.pipe.ts](src/common/pipes/CustomValidationPipe.pipe.ts) with the method: `getDefaultValidatorOptions`
