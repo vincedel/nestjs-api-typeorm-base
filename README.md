@@ -24,7 +24,7 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+A foundation for a NestJS API
 
 ## Project setup
 
@@ -77,28 +77,56 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
-## Resources
+## Define a constraint which has a dependency with an injectable object
 
-Check out a few resources that may come in handy when working with NestJS:
+You need to add the @Injectable() decorator in your constraint
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```ts
+@Injectable()
+export class MyConstraint implements ValidatorConstraintInterface
+```
 
-## Support
+You need to export your constraint in the module main file
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```ts
+@Module({
+  imports: [],
+  controllers: [],
+  providers: [MyConstraint],
+  exports: [MyConstraint],
+})
+export class MyModule {}
+```
 
-## Stay in touch
+If you need to use it in a DTO, you need to provide it in your module main file where the DTO object is created
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```ts
+@Module({
+  imports: [],
+  controllers: [OtherController],
+  providers: [OtherService, MyConstraint],
+  exports: [OtherService],
+})
+export class OtherModule {}
+```
 
-## License
+We've added to the main configuration of the app this code (You can find it in [/src/config/main-config.ts](src\config\main-config.ts)):
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```ts
+useContainer(app.select(AppModule), { fallbackOnErrors: true });
+```
+
+This line allow to NestJS to share the dependency injection container to class-validator in order to use Injectable object to the custom constraint
+
+With the fallbackOnErrors parameter, if the dependencies resolution failed, class-validator will use his default comportment
+
+## Change the validation options for a specific DTO
+
+If you need to change the validation options for a specific DTO you can use the decorators: `ValidationOptions`
+
+```ts
+@ValidationOptions({ whitelist: true })
+export class MyDto {...}
+```
+
+This will override the default configuration that you can change in the file [/src/common/pipes/CustomValidationPipe.pipe.ts](src\common\pipes\CustomValidationPipe.pipe.ts) with the method: `getDefaultValidatorOptions`

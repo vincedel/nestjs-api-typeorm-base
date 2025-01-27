@@ -1,17 +1,21 @@
 import {
+  Body,
   ClassSerializerInterceptor,
   Controller,
   Get,
   NotFoundException,
   Param,
   ParseUUIDPipe,
+  Post,
   UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import {
   ApiBearerAuth,
+  ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { User } from '../../database/entities/user.entity';
@@ -20,6 +24,8 @@ import { Roles } from '../../auth/decorators/roles.decorator';
 import { RoleEnum } from '../../common/enums/role.enum';
 import { UserPayloadDto } from '../../auth/dto/user-payload.dto';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import { ApiGenericResponse } from 'src/common/dto/api-response.dto';
+import { CreateUserDto } from '../dto/create-user.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -62,5 +68,17 @@ export class UserController {
     }
 
     throw new NotFoundException(`User with ID ${id} not found`);
+  }
+
+  @Post()
+  @UseInterceptors(ClassSerializerInterceptor)
+  @ApiResponse({
+    status: 201,
+    description: 'User created.',
+    type: ApiGenericResponse<User>,
+  })
+  @ApiCreatedResponse({ type: User })
+  async create(@Body() createUserDto: CreateUserDto): Promise<User> {
+    return this.userService.create(createUserDto);
   }
 }
