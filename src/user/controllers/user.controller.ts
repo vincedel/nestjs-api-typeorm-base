@@ -7,9 +7,9 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   UseInterceptors,
 } from '@nestjs/common';
-import { UserService } from '../services/user.service';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -18,14 +18,20 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { User } from '../../database/entities/user.entity';
-import { HttpErrorResponseDto } from '../../common/dto/http-error-response.dto';
-import { Roles } from '../../auth/decorators/roles.decorator';
-import { RoleEnum } from '../../common/enums/role.enum';
-import { UserPayloadDto } from '../../auth/dto/user-payload.dto';
+import {
+  ApiGenericResponse,
+  ListResult,
+} from 'src/common/dto/api-response.dto';
+import { ApiFilterQuery } from 'src/database/decorators/api-filter-query.decorator';
+import { FilterQueryOptionsDto } from 'src/database/dto/filter-query-options.dto';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
-import { ApiGenericResponse } from 'src/common/dto/api-response.dto';
+import { Roles } from '../../auth/decorators/roles.decorator';
+import { UserPayloadDto } from '../../auth/dto/user-payload.dto';
+import { HttpErrorResponseDto } from '../../common/dto/http-error-response.dto';
+import { RoleEnum } from '../../common/enums/role.enum';
+import { User } from '../../database/entities/user.entity';
 import { CreateUserDto } from '../dto/create-user.dto';
+import { UserService } from '../services/user.service';
 
 @ApiTags('Users')
 @Controller('users')
@@ -68,6 +74,16 @@ export class UserController {
     }
 
     throw new NotFoundException(`User with ID ${id} not found`);
+  }
+
+  @Get()
+  @UseInterceptors(ClassSerializerInterceptor)
+  @ApiOkResponse({ type: [User] })
+  @ApiFilterQuery()
+  async getUsers(
+    @Query() queryOptions: FilterQueryOptionsDto,
+  ): Promise<ListResult<User>> {
+    return await this.userService.getUsers(queryOptions);
   }
 
   @Post()

@@ -1,16 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
-import { User } from '../../database/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateUserDto } from '../dto/create-user.dto';
+import { ListResult } from 'src/common/dto/api-response.dto';
+import { FilterQueryOptionsDto } from 'src/database/dto/filter-query-options.dto';
+import { DatabaseService } from 'src/database/services/database.service';
+import { DataSource, FindManyOptions, Repository } from 'typeorm';
 import * as bcryptUtils from '../../common/utils/bcrypt';
+import { User } from '../../database/entities/user.entity';
+import { CreateUserDto } from '../dto/create-user.dto';
 
 @Injectable()
-export class UserService {
+export class UserService extends DatabaseService {
   constructor(
+    dataSource: DataSource,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) {}
+  ) {
+    super(dataSource);
+  }
 
   async getUserById(id: string): Promise<User | null> {
     const user: User | null = await this.userRepository.findOneBy({ id: id });
@@ -20,6 +26,21 @@ export class UserService {
     }
 
     return null;
+  }
+
+  async getUsers(
+    queryOptions: FilterQueryOptionsDto,
+  ): Promise<ListResult<User>> {
+    const findOptions: FindManyOptions =
+      this.getFindOptionsByQueryOptions<User>(queryOptions, User);
+
+    const [entities, count] =
+      await this.userRepository.findAndCount(findOptions);
+
+    return {
+      total: count,
+      result: entities,
+    };
   }
 
   async getUsersByUsernameOrEmail(

@@ -19,3 +19,8 @@ export class ApiGenericResponse<T> {
   @ApiProperty()
   data: T;
 }
+
+export class ListResult<T> {
+  total: number;
+  result: T[];
+}
