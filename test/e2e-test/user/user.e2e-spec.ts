@@ -1,10 +1,11 @@
 import { INestApplication } from '@nestjs/common';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import * as request from 'supertest';
 import { Repository } from 'typeorm';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { createTestingApp } from '../app.setup';
-import { defaultUsers } from '../../mock-data/users.mock';
 import { User } from '../../../src/database/entities/user.entity';
+import { SortEnum } from '../../../src/database/enums/SortEnum.enum';
+import { defaultUsers } from '../../mock-data/users.mock';
+import { createTestingApp } from '../app.setup';
 import { loginAsTestAdminUser, loginAsTestUser } from '../utils/auth.utils';
 
 jest.setTimeout(30000);
@@ -104,6 +105,118 @@ describe('User (e2e)', () => {
           expect(res.body.message).toBe(
             'User with ID 10545872-7061-47a1-849d-d00e3b4df666 not found',
           );
+        });
+    });
+  });
+
+  describe('getUsers', () => {
+    it('should throw an error to access to the endpoint /GET /users because we are not logged', () => {
+      const queryOptions = {
+        page: 1,
+        limit: 10,
+      };
+
+      return request(app.getHttpServer())
+        .get('/users')
+        .query(queryOptions)
+        .expect(401);
+    });
+
+    it('should return all users from the endpoint /GET /users', () => {
+      const queryOptions = {
+        page: 1,
+        limit: -1,
+      };
+
+      return request(app.getHttpServer())
+        .get('/users')
+        .set('Authorization', `Bearer ${userAccessToken}`)
+        .query(queryOptions)
+        .then((res) => {
+          expect(res.body.data.total).toBe(defaultUsers.length);
+          expect(res.body.data.result?.length).toBe(defaultUsers.length);
+        });
+    });
+
+    it('should return 2 users from the endpoint /GET /users', () => {
+      const queryOptions = {
+        page: 1,
+        limit: 2,
+      };
+
+      return request(app.getHttpServer())
+        .get('/users')
+        .set('Authorization', `Bearer ${userAccessToken}`)
+        .query(queryOptions)
+        .then((res) => {
+          expect(res.body.data.result?.length).toBe(2);
+          expect(res.body.data.total).toBe(defaultUsers.length);
+        });
+    });
+
+    it('should return 1 user in the seconde page from the endpoint /GET /users', () => {
+      const queryOptions = {
+        page: 2,
+        limit: defaultUsers.length - 1,
+      };
+
+      return request(app.getHttpServer())
+        .get('/users')
+        .set('Authorization', `Bearer ${userAccessToken}`)
+        .query(queryOptions)
+        .then((res) => {
+          expect(res.body.data.result?.length).toBe(1);
+          expect(res.body.data.total).toBe(defaultUsers.length);
+        });
+    });
+
+    it('should be sorted descending by username from the endpoint /GET /users', () => {
+      const queryOptions = {
+        page: 1,
+        limit: -1,
+        sort: {
+          username: SortEnum.Desc,
+        },
+      };
+
+      return request(app.getHttpServer())
+        .get('/users')
+        .set('Authorization', `Bearer ${userAccessToken}`)
+        .query(queryOptions)
+        .then((res) => {
+          expect(res.body.data.result[0].username).toBe('user_ronaldo');
+          expect(res.body.data.result[1].username).toBe('user_messi');
+          expect(res.body.data.result[2].username).toBe('admin_james');
+          expect(res.body.data.result[3].username).toBe('admin_curry');
+        });
+    });
+
+    it('should be filtered by username like "Admin_%" and sorted by username descending from the endpoint /GET /users', () => {
+      const queryOptions = {
+        page: 1,
+        limit: -1,
+        filter: JSON.stringify([
+          {
+            username: {
+              operator: 'ilike',
+              value: 'Admin_%',
+            },
+          },
+        ]),
+        sort: {
+          username: SortEnum.Desc,
+        },
+      };
+
+      return request(app.getHttpServer())
+        .get('/users')
+        .set('Authorization', `Bearer ${userAccessToken}`)
+        .query(queryOptions)
+        .then((res) => {
+          expect(res.body.data.result.length).toBe(2);
+          expect(res.body.data.total).toBe(2);
+          expect(res.body.data.result[0].username).toBe('admin_james');
+          expect(res.body.data.result[1].username).toBe('admin_curry');
         });
     });
   });

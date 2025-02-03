@@ -48,6 +48,8 @@ We need to build and up the database using the following command:
 $ docker compose up -d
 ```
 
+You also need to create a .env.test file in the root directory of the project with the same content as the .env.example file
+
 ## Compile and run the project
 
 ```bash
