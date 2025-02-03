@@ -1,18 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Expose } from 'class-transformer';
 import {
-  IsString,
   IsEmail,
-  IsOptional,
-  IsStrongPassword,
   IsEnum,
   IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsStrongPassword,
 } from 'class-validator';
-import { Expose } from 'class-transformer';
-import { RoleEnum } from '../../common/enums/role.enum';
+import { MatchField } from '../../common/decorators/constraints/match-field.constraint';
+import { isUnique } from '../../common/decorators/constraints/unique-entity.constraint';
+import { Trim } from '../../common/decorators/trim.decorator';
 import { ValidationOptions } from '../../common/decorators/validation-options.decorator';
-import { MatchField } from 'src/common/decorators/constraints/match-field.constraint';
-import { Trim } from 'src/common/decorators/trim.decorator';
-import { isUnique } from 'src/common/decorators/constraints/unique-entity.constraint';
+import { RoleEnum } from '../../common/enums/role.enum';
 
 @ValidationOptions({ whitelist: true })
 export class CreateUserDto {

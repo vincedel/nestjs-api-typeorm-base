@@ -1,20 +1,25 @@
-import { UserService } from './user.service';
-import { Repository } from 'typeorm';
-import { getRepositoryToken } from '@nestjs/typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
-import { User } from '../../database/entities/user.entity';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { defaultUsers } from '../../../test/mock-data/users.mock';
 import { getRepositoryMock } from '../../../test/utils/repository.mock';
+import { User } from '../../database/entities/user.entity';
+import { UserService } from './user.service';
 
 describe('UserService', () => {
   let userService: UserService;
   let userRepository: Repository<User>;
+  let dataSource: DataSource;
   const userRepositoryToken = getRepositoryToken(User);
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UserService,
+        {
+          provide: DataSource,
+          useValue: {},
+        },
         {
           provide: userRepositoryToken,
           useValue: getRepositoryMock<User>(defaultUsers),
@@ -24,6 +29,7 @@ describe('UserService', () => {
 
     userService = module.get<UserService>(UserService);
     userRepository = module.get<Repository<User>>(userRepositoryToken);
+    dataSource = module.get<DataSource>(DataSource);
   });
 
   it('should be defined', () => {

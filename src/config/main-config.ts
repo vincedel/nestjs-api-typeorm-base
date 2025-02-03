@@ -1,10 +1,10 @@
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { INestApplication } from '@nestjs/common';
-import { ResponseInterceptor } from '../common/interceptors/transform.interceptor';
 import { Reflector } from '@nestjs/core';
-import { CustomValidationPipe } from 'src/common/pipes/CustomValidationPipe.pipe';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { useContainer } from 'class-validator';
-import { AppModule } from 'src/app.module';
+import { AppModule } from '../app.module';
+import { ResponseInterceptor } from '../common/interceptors/transform.interceptor';
+import { CustomValidationPipe } from '../common/pipes/CustomValidationPipe.pipe';
 
 export function configApp(app: INestApplication): INestApplication {
   const config = new DocumentBuilder()

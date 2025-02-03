@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ListResult } from 'src/common/dto/api-response.dto';
 import { FilterQueryOptionsDto } from 'src/database/dto/filter-query-options.dto';
-import { DatabaseService } from 'src/database/services/database.service';
 import { DataSource, FindManyOptions, Repository } from 'typeorm';
 import * as bcryptUtils from '../../common/utils/bcrypt';
 import { User } from '../../database/entities/user.entity';
+import { DatabaseService } from '../../database/services/database.service';
 import { CreateUserDto } from '../dto/create-user.dto';
 
 @Injectable()

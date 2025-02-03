@@ -18,17 +18,17 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import {
-  ApiGenericResponse,
-  ListResult,
-} from 'src/common/dto/api-response.dto';
-import { ApiFilterQuery } from 'src/database/decorators/api-filter-query.decorator';
-import { FilterQueryOptionsDto } from 'src/database/dto/filter-query-options.dto';
+import { FilterQueryOptionsDto } from '../..//database/dto/filter-query-options.dto';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { Roles } from '../../auth/decorators/roles.decorator';
 import { UserPayloadDto } from '../../auth/dto/user-payload.dto';
+import {
+  ApiGenericResponse,
+  ListResult,
+} from '../../common/dto/api-response.dto';
 import { HttpErrorResponseDto } from '../../common/dto/http-error-response.dto';
 import { RoleEnum } from '../../common/enums/role.enum';
+import { ApiFilterQuery } from '../../database/decorators/api-filter-query.decorator';
 import { User } from '../../database/entities/user.entity';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UserService } from '../services/user.service';

@@ -1,6 +1,6 @@
-import { createUser } from '../factories/user.factory';
 import { RoleEnum } from '../../src/common/enums/role.enum';
 import { User } from '../../src/database/entities/user.entity';
+import { createUser } from '../factories/user.factory';
 
 export const defaultUsers: User[] = [
   createUser({
