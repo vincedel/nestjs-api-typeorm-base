@@ -1,9 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { randomUUID } from 'crypto';
 import { DataSource, Repository } from 'typeorm';
 import { defaultUsers } from '../../../test/mock-data/users.mock';
 import { getRepositoryMock } from '../../../test/utils/repository.mock';
+import { RoleEnum } from '../../common/enums/role.enum';
+import * as bcryptUtils from '../../common/utils/bcrypt';
 import { User } from '../../database/entities/user.entity';
+import { CreateUserDto } from '../dto/create-user.dto';
 import { UserService } from './user.service';
 
 describe('UserService', () => {
@@ -57,6 +61,40 @@ describe('UserService', () => {
         id: '1262cc96-f314-4727-94df-504b6ac256aa',
       });
       expect(userRepository.findOneBy).toHaveReturnedWith(null);
+    });
+  });
+
+  describe('getUsers', () => {
+    it('should return a list a users', async () => {
+      const queryOptions = {
+        page: 1,
+        limit: 20,
+      };
+
+      const findOptions = {
+        skip: 0,
+        take: 20,
+      };
+
+      jest
+        .spyOn(userService, 'getFindOptionsByQueryOptions')
+        .mockReturnValue(findOptions);
+
+      jest
+        .spyOn(userRepository, 'findAndCount')
+        .mockResolvedValue([defaultUsers, defaultUsers.length]);
+
+      const result = await userService.getUsers(queryOptions);
+
+      expect(userService.getFindOptionsByQueryOptions).toHaveBeenCalledWith(
+        queryOptions,
+        User,
+      );
+      expect(userRepository.findAndCount).toHaveBeenCalledWith(findOptions);
+      expect(result).toStrictEqual({
+        total: defaultUsers.length,
+        result: defaultUsers,
+      });
     });
   });
 
@@ -125,6 +163,46 @@ describe('UserService', () => {
         ],
       });
       expect(userRepository.findOne).toHaveReturnedWith(null);
+    });
+  });
+
+  describe('create', () => {
+    it('should create a new user', async () => {
+      const userDto: CreateUserDto = {
+        username: 'test',
+        email: 'test@clubber.com',
+        firstName: 'test',
+        lastName: 'test',
+        password: 'password',
+        passwordConfirm: 'password',
+        role: RoleEnum.Admin,
+      };
+
+      const { passwordConfirm, ...resultRepositoryCreate } = userDto;
+
+      const resultCreateMethod = {
+        ...resultRepositoryCreate,
+        password: 'PasswordEncoded',
+        id: randomUUID(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      jest
+        .spyOn(bcryptUtils, 'encodePassword')
+        .mockReturnValue('PasswordEncoded');
+
+      jest.spyOn(userRepository, 'create').mockReturnValue(resultCreateMethod);
+      jest.spyOn(userRepository, 'save').mockResolvedValue(resultCreateMethod);
+
+      const result = await userService.create(userDto);
+
+      expect(bcryptUtils.encodePassword).toHaveBeenCalledWith('password');
+      expect(userRepository.create).toHaveBeenCalledWith({
+        ...resultRepositoryCreate,
+        password: 'PasswordEncoded',
+      });
+      expect(result).toStrictEqual(resultCreateMethod);
     });
   });
 });

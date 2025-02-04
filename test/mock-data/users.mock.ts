@@ -53,4 +53,6 @@ export const UserProvider = {
         );
       }),
     ),
+  getUsers: jest.fn(),
+  create: jest.fn(),
 };

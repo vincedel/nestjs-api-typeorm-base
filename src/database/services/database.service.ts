@@ -1,4 +1,4 @@
-import { FilterQueryOptionsDto } from '../dto/filter-query-options.dto';
+import { BadRequestException } from '@nestjs/common';
 import {
   ArrayContains,
   DataSource,
@@ -14,9 +14,8 @@ import {
   Not,
 } from 'typeorm';
 import { FindOptionsWhere } from 'typeorm/find-options/FindOptionsWhere';
+import { FilterQueryOptionsDto } from '../dto/filter-query-options.dto';
 import { FilterEnum } from '../enums/FilterEnum.enum';
-import { ArrayNotContains, IsNotEmpty } from 'class-validator';
-import { BadRequestException } from '@nestjs/common';
 
 export abstract class DatabaseService {
   constructor(private readonly dataSource: DataSource) {}
@@ -32,8 +31,10 @@ export abstract class DatabaseService {
       findOptions.take = limit;
     }
 
-    if (page) {
+    if (page && limit >= 0) {
       findOptions.skip = (page - 1) * limit;
+    } else {
+      findOptions.skip = 0;
     }
 
     if (sort) {
@@ -100,18 +101,18 @@ export abstract class DatabaseService {
         return IsNull();
       }
       case FilterEnum.IS_NOT_NULL: {
-        return IsNotEmpty();
+        return Not(IsNull());
       }
       case FilterEnum.IN_ARRAY: {
         return ArrayContains(filterOption.value);
       }
       case FilterEnum.NOT_IN_ARRAY: {
-        return ArrayNotContains(filterOption.value);
+        return Not(ArrayContains(filterOption.value));
       }
     }
 
     throw new BadRequestException(
-      `Filter operator '${filterOption.operator}' doesn't not exist`,
+      `Filter operator '${filterOption.operator}' doesn't exist`,
     );
   }
 

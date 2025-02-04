@@ -1,6 +1,5 @@
 export function getRepositoryMock<Entity>(dataProvider: Entity[] = []) {
   const data: Entity[] = [...dataProvider];
-  console.log(data);
 
   return {
     findOne: jest.fn().mockImplementation((options: any) => {
@@ -30,5 +29,8 @@ export function getRepositoryMock<Entity>(dataProvider: Entity[] = []) {
 
       return entityFound ?? null;
     }),
+    findAndCount: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
   };
 }
